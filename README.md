@@ -1,7 +1,7 @@
 # 🤖 Automation Portfolio
 
 > Real-world automation workflows built with n8n, REST APIs, and JavaScript.
-> Built by **Elkay** — Cybersecurity Student & Automation Engineer.
+> Built by **Elkay** — Cybersecurity Specialist & Automation Engineer.
 
 ---
 
