@@ -1,0 +1,235 @@
+{
+  "name": "Weather Alerts Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        0
+      ],
+      "id": "832bbc3f-426f-4de0-adf8-b477d33a99fa",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather?q=Kaduna,NG&appid=d85bab775bf57ee4664616128ac69f95&units=metric",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        -160
+      ],
+      "id": "04a05cf8-bdc1-440b-b5fc-71e0e79c23a1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather?q=Zaria,NG&appid=d85bab775bf57ee4664616128ac69f95&units=metric",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        112
+      ],
+      "id": "751b547d-589f-4555-a31d-941c4602d980",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        -32
+      ],
+      "id": "dae11c3d-c275-4f00-8366-0723134afb07",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst kaduna = items[0].json;\nconst zaria = items[1].json;\n\nfunction formatCity(data) {\n  const name = data.name;\n  const temp = data.main.temp;\n  const feelsLike = data.main.feels_like;\n  const humidity = data.main.humidity;\n  const condition = data.weather[0].description;\n  const windSpeed = data.wind.speed;\n\n  const willRain = data.weather[0].main === \"Rain\" || \n                   data.weather[0].main === \"Drizzle\" ||\n                   data.weather[0].main === \"Thunderstorm\";\n\n  const rainAlert = willRain \n    ? \"☔ RAIN EXPECTED — carry an umbrella!\" \n    : \"☀️ No rain expected today.\";\n\n  return `\n📍 ${name}\n🌡️ Temperature: ${temp}°C (Feels like ${feelsLike}°C)\n💧 Humidity: ${humidity}%\n🌤️ Condition: ${condition}\n💨 Wind Speed: ${windSpeed} m/s\n${rainAlert}\n  `.trim();\n}\n\nconst kadunaReport = formatCity(kaduna);\nconst zariaReport = formatCity(zaria);\n\nconst today = new Date().toLocaleDateString('en-GB', { \n  weekday: 'long', \n  year: 'numeric', \n  month: 'long', \n  day: 'numeric' \n});\n\nconst emailBody = `\nGood morning! 🌅\n\nHere is your daily weather report for ${today}.\n\n━━━━━━━━━━━━━━━━━━━━━━\n${kadunaReport}\n\n━━━━━━━━━━━━━━━━━━━━━━\n${zariaReport}\n\n━━━━━━━━━━━━━━━━━━━━━━\n\nStay prepared and have a great day!\n— Your Weather Bot 🤖\n`.trim();\n\nreturn [{\n  json: {\n    subject: `🌤️ Daily Weather Report — Kaduna & Zaria | ${today}`,\n    body: emailBody\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        128
+      ],
+      "id": "69921754-76d4-45ea-a505-d2d9ad5afebb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "elkhamis1234@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        176
+      ],
+      "id": "304c3195-4555-4e62-b633-b7e3a2ecdea3",
+      "name": "Send a message",
+      "webhookId": "29a681ac-6f0d-4887-9cbf-858aaa0f7155",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zVBuAGDlcytc8Vdu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const weatherMessage = $input.first().json.body;\n\nconst recipients = [\n  { name: \"Person 1\", chatId: \"6513217115\" },\n];\n\nreturn recipients.map(recipient => ({\n  json: {\n    chatId: recipient.chatId,\n    name: recipient.name,\n    message: weatherMessage\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "7e77f4ec-cd69-4694-9bb0-d4504e1af828",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        128
+      ],
+      "id": "fdd0251f-0287-4084-ae29-55859911d874",
+      "name": "Send a text message",
+      "webhookId": "bba9dca1-5370-440a-8e7e-2175306d3000",
+      "credentials": {
+        "telegramApi": {
+          "id": "8KiVxfqg4vtF8aVP",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3c8c76bc-9a28-4550-9065-b68624cca8ad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a88ca9e9461dcefc8a6b816f3f8ff2a527c831af2764ab10dc746ff829fb1c30"
+  },
+  "id": "JStL5tGcpKIRk4fT",
+  "tags": []
+}

@@ -1,0 +1,794 @@
+{
+  "name": "Smart Applicant Response System",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2186d013-74d1-42e6-8df5-382b8efb37e7",
+              "name": "Full Name",
+              "value": "={{ $json['Full Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9e0d8f50-206a-4f74-95ec-bbd07acab8d4",
+              "name": "Email Address",
+              "value": "={{ $json['Email Address'] }}",
+              "type": "string"
+            },
+            {
+              "id": "365cb4c3-7d20-43eb-ab47-c10df5e20856",
+              "name": "AutomationLevel",
+              "value": "={{ $json.AutomationLevel }}",
+              "type": "string"
+            },
+            {
+              "id": "56e17cd7-ca0c-48f8-b9bc-1034151807b9",
+              "name": "=Commitment Hrs",
+              "value": "={{ $json['Commitment Hrs'] }}",
+              "type": "string"
+            },
+            {
+              "id": "7c9937b1-ff69-4b60-acf2-df437889850f",
+              "name": "=",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "4e89d897-06b6-495b-8d70-d7877f64964c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.AutomationLevel }}",
+                    "rightValue": "Beginner",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ac10cf9d-18cf-4063-815d-b8a33a16a703"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "85880cf4-6717-422c-9205-e6a11afe001d",
+                    "leftValue": "={{ $json.AutomationLevel }}",
+                    "rightValue": "Intermediate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "67d4fee5-befe-42c1-b7fa-848633781f17",
+                    "leftValue": "={{ $json.AutomationLevel }}",
+                    "rightValue": "Advanced",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        0
+      ],
+      "id": "5dacf6d1-027c-415a-bb36-1c493e2e6686",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        -176
+      ],
+      "id": "3364cdc4-bab4-49fa-82ce-0a5199606558",
+      "name": "Wait",
+      "webhookId": "dba84309-d93e-4b00-90f4-bacc6f580e9c"
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        16
+      ],
+      "id": "ecb1611b-9909-4e61-91d0-f61f2e50fcb2",
+      "name": "Wait1",
+      "webhookId": "372d97c9-e857-4535-9f3f-09f3d731cfe3"
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        224
+      ],
+      "id": "a5403777-7ef9-4d2f-9c37-65f6789bf523",
+      "name": "Wait2",
+      "webhookId": "69ca8e88-3406-44f9-88c5-6d22a03f22ea"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Email Address'] }}",
+        "subject": "Welcome To n8n Automation. Your Journey Starts Here.",
+        "emailType": "text",
+        "message": "=Hello {{ $('Google Sheets Trigger').item.json['Full Name'] }},\nWelcome to the automation program.\nDon't worry if you are new. Everyone starts somewhere, and we'll guide you step by step.\n\nWe're excited to help you grow.\n\nRegards,\nAutomation Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        -176
+      ],
+      "id": "72525dc8-142c-4882-a43a-0cdbd328e515",
+      "name": "Send a message",
+      "webhookId": "bea30cac-f895-4356-ae1e-5f1069ff3a05",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zVBuAGDlcytc8Vdu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Email Address'] }}",
+        "subject": "You're in Let's build Real Automation Skills ",
+        "emailType": "text",
+        "message": "=Hello {{ $('Google Sheets Trigger').item.json['Full Name'] }}, \nWe noticed you already have some automation experience.\nOur expectation is that you'll move faster throuh learning process and begin building practical solutions quickly.\nYou'll be working on real-world automation projects throughout the program.\n\nSee you inside.\nAutomation Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        16
+      ],
+      "id": "59002c4d-107e-4120-943b-6c405fbceb09",
+      "name": "Send a message1",
+      "webhookId": "e585858d-7ee3-4e14-adf5-aa964e645f7b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zVBuAGDlcytc8Vdu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Email Address'] }}",
+        "subject": "Selected. Advanced Track in n8n Automation Cohort",
+        "emailType": "text",
+        "message": "=Hello  {{ $('Google Sheets Trigger').item.json['Full Name'] }},\nBased on your experience level, we'd like to position you as a peer-level participant.\n\nYou'll have oppurtunities to contribute, collaborate and explore advanced topics involving:\n-APIs\n-AI integrations\n-Automation Scaling\n\nWe look forward to learning and building alongside you.\n\nBest Rgards,\nAutomation Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        224
+      ],
+      "id": "3b300bf3-c293-4a59-a713-9e4aeb31b8fd",
+      "name": "Send a message2",
+      "webhookId": "683afac1-253e-4049-bd0a-330fa38ee63d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zVBuAGDlcytc8Vdu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss",
+          "mode": "list",
+          "cachedResultName": "Smart Applicant Response",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Address": "={{ $('Google Sheets Trigger').item.json['Email Address'] }}",
+            "Status": "Email sent",
+            "Level category": "Beginner"
+          },
+          "matchingColumns": [
+            "Email Address"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AutomationLevel",
+              "displayName": "AutomationLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Commitment Hrs",
+              "displayName": "Commitment Hrs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Level category",
+              "displayName": "Level category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        -176
+      ],
+      "id": "c0ef3828-ce51-49bd-9185-db71ca12bdfa",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VOytpRML6MqV4e6E",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss",
+          "mode": "list",
+          "cachedResultName": "Smart Applicant Response",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Address": "={{ $('Google Sheets Trigger').item.json['Full Name'] }}",
+            "Level category": "Intermediate",
+            "Status": "Email sent"
+          },
+          "matchingColumns": [
+            "Email Address"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AutomationLevel",
+              "displayName": "AutomationLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Commitment Hrs",
+              "displayName": "Commitment Hrs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Level category",
+              "displayName": "Level category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        16
+      ],
+      "id": "2617a61e-f28b-45ae-8b24-4f8cd4839f4e",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VOytpRML6MqV4e6E",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss",
+          "mode": "list",
+          "cachedResultName": "Smart Applicant Response",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email Address": "={{ $('Google Sheets Trigger').item.json['Email Address'] }}",
+            "Status": "Email sent",
+            "Level category": "Advanced"
+          },
+          "matchingColumns": [
+            "Email Address"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AutomationLevel",
+              "displayName": "AutomationLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Commitment Hrs",
+              "displayName": "Commitment Hrs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Level category",
+              "displayName": "Level category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        736,
+        224
+      ],
+      "id": "959de893-1981-4e30-8e38-513011fa41d5",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VOytpRML6MqV4e6E",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss",
+          "mode": "list",
+          "cachedResultName": "Smart Applicant Response",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ElNjyr-Mn_ToSUy1BYGwSV3fEfzE3og5sjtt1Fidss/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -16
+      ],
+      "id": "2242c1c8-21d9-42be-afa4-fc35da1e1d05",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "G1fPYIyzDAIqLbgt",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2bfc816e-98a7-41c2-ba26-2cb628603410",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a88ca9e9461dcefc8a6b816f3f8ff2a527c831af2764ab10dc746ff829fb1c30"
+  },
+  "id": "DB17grw0QFk0kqrq",
+  "tags": []
+}

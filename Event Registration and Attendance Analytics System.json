@@ -1,0 +1,201 @@
+{
+  "name": "Event Registration and Attendance Analytics System",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -48
+      ],
+      "id": "2097388e-1921-4ed3-91c3-bf81d77093a0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://randomuser.me/api/?results=100",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -336,
+        -208
+      ],
+      "id": "b95adc23-44d8-4bb1-bff2-b325344f011a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Unwrap directly from the HTTP Request output\nconst rawResults = $input.first().json.results;\n\nconst events = [\n  \"AI Workshop\",\n  \"Career Development Seminar\",\n  \"Startup Innovation Summit\"\n];\n\n// Step 1: Transform all participants\nconst participants = rawResults.map((user, index) => {\n  return {\n    id: index + 1,\n    name: `${user.name.first} ${user.name.last}`,\n    email: user.email,\n    gender: user.gender,\n    country: user.location.country,\n    age: user.dob.age,\n    event: events[index % 3],\n    registeredAt: new Date().toISOString(),\n    status: \"registered\",\n    isDuplicate: false\n  };\n});\n\n// Step 2: Pick 15 random participants and duplicate them\nconst shuffled = [...participants].sort(() => Math.random() - 0.5);\nconst toRepeat = shuffled.slice(0, 15);\n\nconst duplicates = toRepeat.map(p => ({\n  ...p,\n  registeredAt: new Date().toISOString(),\n  _isDuplicateInjected: true\n}));\n\n// Step 3: Combine originals + duplicates\nconst combined = [...participants, ...duplicates];\n\nreturn combined.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        160
+      ],
+      "id": "369ccfd1-9dd2-45fd-99e4-a39317a27c70",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "registrations",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "3bf4cc21-ba2b-431c-953a-113ebaa9c133",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const registrations = $input.first().json.registrations;\n\nconst seen = new Map();\nconst processed = [];\n\nfor (const reg of registrations) {\n  const key = `${reg.email}|${reg.event}`;\n\n  if (seen.has(key)) {\n    processed.push({ ...reg, isDuplicate: true, status: \"duplicate\" });\n  } else {\n    seen.set(key, true);\n    processed.push({ ...reg, isDuplicate: false, status: \"registered\" });\n  }\n}\n\nconst valid = processed.filter(r => !r.isDuplicate);\nconst duplicates = processed.filter(r => r.isDuplicate);\n\nreturn [{\n  json: {\n    allRegistrations: processed,\n    validRegistrations: valid,\n    duplicateRegistrations: duplicates,\n    totalCount: processed.length,\n    validCount: valid.length,\n    duplicateCount: duplicates.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -224
+      ],
+      "id": "9a0dbbbd-c013-47f2-bec9-d358417bcb0e",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { validRegistrations, duplicateRegistrations,\n        totalCount, validCount, duplicateCount } = $input.first().json;\n\n// 70% chance of attending — realistic no-show rate for professional events\nconst withAttendance = validRegistrations.map(reg => ({\n  ...reg,\n  attendance: Math.random() < 0.70 ? \"Attended\" : \"Absent\"\n}));\n\nreturn [{\n  json: {\n    attendanceRecords: withAttendance,\n    duplicateRegistrations,\n    totalCount,\n    validCount,\n    duplicateCount\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        80
+      ],
+      "id": "28c11e81-89a7-4a8e-980e-ed39f20bd6d4",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { attendanceRecords, duplicateRegistrations,\n        totalCount, validCount, duplicateCount } = $input.first().json;\n\nconst events = [\n  \"AI Workshop\",\n  \"Career Development Seminar\",\n  \"Startup Innovation Summit\"\n];\n\n// Per-event breakdown\nconst eventStats = {};\nfor (const ev of events) {\n  const group = attendanceRecords.filter(r => r.event === ev);\n  const attended = group.filter(r => r.attendance === \"Attended\");\n  const absent = group.filter(r => r.attendance === \"Absent\");\n\n  eventStats[ev] = {\n    totalRegistered: group.length,\n    attended: attended.length,\n    absent: absent.length,\n    attendanceRate: group.length > 0\n      ? ((attended.length / group.length) * 100).toFixed(1) + \"%\"\n      : \"0%\",\n    noShowRate: group.length > 0\n      ? ((absent.length / group.length) * 100).toFixed(1) + \"%\"\n      : \"0%\"\n  };\n}\n\n// Leaderboard — ranked by attendance rate (Bonus 1)\nconst leaderboard = Object.entries(eventStats)\n  .sort((a, b) => parseFloat(b[1].attendanceRate) - parseFloat(a[1].attendanceRate))\n  .map(([name, stats], i) => ({ rank: i + 1, event: name, ...stats }));\n\nconst totalAttended = attendanceRecords.filter(r => r.attendance === \"Attended\").length;\nconst totalAbsent = attendanceRecords.filter(r => r.attendance === \"Absent\").length;\n\nreturn [{\n  json: {\n    attendanceRecords,\n    duplicateRegistrations,\n    eventStats,\n    leaderboard,\n    summary: {\n      totalRegistrations: totalCount,\n      validRegistrations: validCount,\n      duplicateRegistrations: duplicateCount,\n      totalAttended,\n      totalAbsent,\n      overallAttendanceRate: ((totalAttended / validCount) * 100).toFixed(1) + \"%\",\n      overallNoShowRate: ((totalAbsent / validCount) * 100).toFixed(1) + \"%\",\n      mostPopularEvent: leaderboard[0].event,\n      leastPopularEvent: leaderboard[leaderboard.length - 1].event\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -112
+      ],
+      "id": "613b7f71-47f7-464f-93ac-bcb4ca12cca6",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { summary, eventStats, leaderboard } = $input.first().json;\n\nconst report = {\n  reportTitle: \"Event Registration & Attendance Analytics Report\",\n  generatedAt: new Date().toISOString(),\n\n  registrationStatistics: {\n    totalRegistrations: summary.totalRegistrations,\n    validRegistrations: summary.validRegistrations,\n    duplicateRegistrations: summary.duplicateRegistrations\n  },\n\n  eventStatistics: {\n    mostPopularEvent: summary.mostPopularEvent,\n    leastPopularEvent: summary.leastPopularEvent,\n    breakdown: eventStats\n  },\n\n  attendanceStatistics: {\n    totalAttended: summary.totalAttended,\n    totalAbsent: summary.totalAbsent,\n    attendanceRate: summary.overallAttendanceRate,\n    noShowRate: summary.overallNoShowRate\n  },\n\n  leaderboard: leaderboard\n};\n\nreturn [{ json: report }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        32
+      ],
+      "id": "3ce2c182-b808-4eb8-b1be-ba8b385df7de",
+      "name": "Code in JavaScript4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c5d4b17b-b7b7-4aaf-9af8-4a448bd208ea",
+  "meta": {
+    "instanceId": "a88ca9e9461dcefc8a6b816f3f8ff2a527c831af2764ab10dc746ff829fb1c30"
+  },
+  "id": "RXsV0o3CgtXbeZGP",
+  "tags": []
+}
