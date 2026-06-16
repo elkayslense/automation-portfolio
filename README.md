@@ -1,7 +1,7 @@
 # 🤖 Automation Portfolio
 
 > Real-world automation workflows built with n8n, REST APIs, and JavaScript.
-> Built by **Elkay** — Cybersecurity Specialist & Automation Engineer.
+> Built by **Elkay** — Cybersecurity Student & Automation Engineer.
 
 ---
 
@@ -11,7 +11,8 @@
 |---|---------|-------|--------|
 | 01 | [Event Registration & Analytics System](#-project-1--event-registration--attendance-analytics-system) | n8n, REST API, JavaScript | ✅ Complete |
 | 02 | [Daily Weather Alert Bot](#-project-2--daily-weather-alert-bot) | n8n, OpenWeatherMap, Gmail, Telegram | ✅ Complete |
-| 03 | Form → Email Pipeline | n8n, Webhooks, Google Sheets | 🔨 Coming Soon |
+| 03 | [Smart Applicant Response System](#-project-3--smart-applicant-response-system) | n8n, Google Sheets, Gmail, Switch Node | ✅ Complete |
+| 04 | Form → Email Pipeline | n8n, Webhooks, Google Sheets | 🔨 Coming Soon |
 
 ---
 
@@ -150,6 +151,72 @@ Stay prepared and have a great day!
 
 ---
 
+## 📬 Project 3 — Smart Applicant Response System
+
+### Problem
+Most organizations send the same generic email to every applicant regardless of their skill level. This makes communication feel impersonal and ineffective — beginners need encouragement, intermediates need challenge, and advanced learners should be treated as collaborators.
+
+### Solution
+A fully automated n8n workflow that reads applicant data from Google Sheets, detects their skill level using a Switch node, and sends a fully personalized email response — then updates the sheet with the result automatically.
+
+### Workflow Architecture
+```
+Google Sheets Trigger (new row added)
+      ↓
+Set Node (clean & prepare data)
+      ↓
+Switch Node (route by skill level)
+      ↓              ↓               ↓
+Wait 3min       Wait 3min       Wait 3min
+      ↓              ↓               ↓
+Gmail            Gmail           Gmail
+(Beginner)   (Intermediate)   (Advanced)
+      ↓              ↓               ↓
+      └──────────────┴───────────────┘
+                     ↓
+         Google Sheets Update Row
+         (Status = Email Sent)
+```
+
+### Key Features
+- Triggers automatically when a new applicant row is added to Google Sheets
+- Extracts and cleans applicant data using a Set node (first name, email, level, commitment hours, city)
+- Routes applicants into 3 branches using a Switch node based on automation skill level
+- Sends fully personalized emails per branch:
+  - **Beginner** — friendly & encouraging tone, WhatsApp group link, next steps
+  - **Intermediate** — direct & challenging tone, real-world automation expectations
+  - **Advanced** — professional & opportunity-focused, collaboration & API/AI mention
+- 3-minute Wait node before each email — simulates real-world email pacing
+- Updates Google Sheet after sending with Status, Level Category, and Timestamp
+
+### Routing Logic
+| Input Value | Route |
+|-------------|-------|
+| Beginner, No experience | Beginner Branch |
+| Intermediate, Some experience | Intermediate Branch |
+| Advanced, Expert, Professional | Advanced Branch |
+
+### Design Decisions
+| Decision | Justification |
+|----------|--------------|
+| Switch node over IF node | Handles 3+ conditions cleanly in one node |
+| 3-minute Wait node | Simulates email pacing, reduces system overload |
+| Google Sheets as data source | No-code friendly, easy for non-technical admins to manage |
+| Update row after sending | Creates an audit trail and prevents duplicate sends |
+| Personalized subject lines | Increases open rates — generic subjects get ignored |
+
+### Email Subject Lines
+```
+Beginner:     "Welcome to n8n Automation — Your Journey Starts Here"
+Intermediate: "You're In — Let's Build Real Automation Skills"
+Advanced:     "Selected: Advanced Track in n8n Automation Cohort"
+```
+
+### n8n Concepts Demonstrated
+✅ Google Sheets Trigger · ✅ Set Node · ✅ Switch Node · ✅ Wait Node · ✅ Gmail · ✅ Google Sheets Update · ✅ Conditional Routing · ✅ Data Personalization
+
+---
+
 ## 🧰 Tools & Technologies
 
 | Tool | Purpose |
@@ -160,6 +227,7 @@ Stay prepared and have a great day!
 | **OpenWeatherMap API** | Live weather data |
 | **Gmail** | Email delivery |
 | **Telegram Bot API** | Instant messaging & broadcasting |
+| **Google Sheets** | Data source & result tracking |
 
 ---
 
@@ -168,6 +236,7 @@ Stay prepared and have a great day!
 I'm a cybersecurity student passionate about automation and building systems that solve real problems. I combine cybersecurity knowledge with automation skills to create smart, efficient workflows.
 
 📫 Connect with me on [LinkedIn](https://linkedin.com/in/muhammad-khamis-armaya-u-6180153a7)
+
 
 ---
 
